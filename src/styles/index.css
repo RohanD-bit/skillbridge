@@ -1,0 +1,55 @@
+@import 'tailwindcss';
+@theme {
+  --color-forest: #124d42;
+  --color-mint: #e8f1eb;
+  --color-sage: #548360;
+  --color-canvas: #f8f9f5;
+  --color-ink: #22372e;
+  --color-muted: #58665e;
+  --color-line: #e2e7df;
+  --font-sans: 'Segoe UI', ui-sans-serif, system-ui, sans-serif;
+}
+@layer base {
+  body {
+    margin: 0;
+    min-width: 320px;
+  }
+  button,
+  input,
+  select {
+    font: inherit;
+  }
+  button:disabled,
+  input:disabled,
+  select:disabled {
+    cursor: not-allowed;
+  }
+  :focus-visible {
+    outline: 3px solid #548360;
+    outline-offset: 4px;
+  }
+  ::selection {
+    background: #d3e6a6;
+    color: #183d30;
+  }
+}
+@layer components {
+  .eyebrow {
+    @apply text-xs font-semibold tracking-[0.14em] text-forest uppercase;
+  }
+  .card {
+    @apply rounded-2xl border border-line bg-white p-6;
+  }
+  .button {
+    @apply min-h-12 rounded-xl bg-forest px-5 py-3 text-sm font-semibold text-white hover:bg-[#1d6253] disabled:bg-stone-200 disabled:text-stone-600;
+  }
+  .field-label {
+    @apply block text-sm font-medium text-ink;
+  }
+  .field {
+    @apply mt-2 block min-h-12 w-full rounded-xl border border-line bg-white px-4 py-3 text-sm text-ink placeholder:text-muted disabled:bg-stone-50 disabled:text-muted;
+  }
+  .skip-link {
+    @apply fixed top-3 left-3 z-50 -translate-y-24 rounded-lg bg-forest px-5 py-3 text-white focus:translate-y-0;
+  }
+}
