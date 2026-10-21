@@ -1,9 +1,19 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { PageIntro, PreviewNotice } from '../components/PageIntro'
 import { Icon } from '../components/Icon'
 export function AssessmentPage() {
+  const location = useLocation()
   return (
     <>
+      {location.state?.onboardingSaved === true && (
+        <p
+          role="status"
+          className="mb-6 rounded-xl border border-line bg-mint p-4 text-sm text-forest"
+        >
+          Your learning preferences are saved. You’re ready for your knowledge
+          check.
+        </p>
+      )}
       <PageIntro
         eyebrow="Step 02 · Knowledge check"
         title="Find your starting point."

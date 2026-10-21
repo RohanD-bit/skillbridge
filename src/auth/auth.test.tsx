@@ -41,6 +41,15 @@ vi.mock('../lib/supabase', () => ({
   authRedirectError: null,
 }))
 vi.mock('./student-profile', () => ({ ensureStudentProfile: mock.profile }))
+vi.mock('../onboarding/profile-preferences', () => ({
+  loadStudentPreferences: vi.fn(async () => ({
+    id: 'fixture-student',
+    interests: [],
+    learning_goal: null,
+    experience_level: 'beginner',
+  })),
+  saveStudentPreferences: vi.fn(),
+}))
 
 const student = { user: { id: 'fixture-student' } } as Session
 const profile = {
@@ -169,7 +178,7 @@ describe('authentication routes and forms', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Create account' }))
     expect(
       await screen.findByRole('heading', {
-        name: 'Your money. Your future. Your next move.',
+        name: 'Make your learning path yours.',
       }),
     ).toBeTruthy()
   })
