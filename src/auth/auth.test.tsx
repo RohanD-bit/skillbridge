@@ -41,6 +41,10 @@ vi.mock('../lib/supabase', () => ({
   authRedirectError: null,
 }))
 vi.mock('./student-profile', () => ({ ensureStudentProfile: mock.profile }))
+vi.mock('../assessment/assessment-api', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../assessment/assessment-api')>()),
+  getLatestAssessment: vi.fn(async () => null),
+}))
 vi.mock('../onboarding/profile-preferences', () => ({
   loadStudentPreferences: vi.fn(async () => ({
     id: 'fixture-student',

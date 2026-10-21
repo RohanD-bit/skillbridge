@@ -1,0 +1,54 @@
+// Generator fragment: inlined into assessment-questions-diagnostic.ts.
+// This file is not a separate Dashboard function or a frontend module.
+// Types and dependencies come from the inlined canonical modules.
+
+function logSafeFailure(stage: string, error: unknown) {
+  // Explicit allowlist: never log arbitrary error messages, details, stacks,
+  // database rows, requests, environment values, identities, or credentials.
+  const allowed = new Set([
+    '42501', // Insufficient table/schema privileges.
+    '42703', // Missing column.
+    '42P01', // Missing table.
+    '3F000', // Missing schema.
+    'PGRST106', // Schema not exposed.
+    'PGRST204', // Column absent from schema cache.
+    'PGRST205', // Table absent from schema cache.
+    'PGRST301', // Database API authentication failure.
+    'PGRST302',
+    'PGRST303',
+  ])
+  const candidate = isObject(error) ? error.code : undefined
+  const code =
+    typeof candidate === 'string' && allowed.has(candidate)
+      ? candidate
+      : 'UNCLASSIFIED'
+  console.error('[assessment-diagnostic]', { stage, code })
+}
+
+function createDiagnosticDependencies(): AssessmentDependencies {
+  let repository: AssessmentDependencies
+  try {
+    repository = createDependencies()
+  } catch (error) {
+    logSafeFailure('server_configuration', error)
+    throw error
+  }
+  async function observe<T>(stage: string, operation: () => Promise<T>) {
+    try {
+      return await operation()
+    } catch (error) {
+      logSafeFailure(stage, error)
+      throw error
+    }
+  }
+  return {
+    authenticate: (token) =>
+      observe('verify_student_session', () => repository.authenticate(token)),
+    getPublicQuestions: () =>
+      observe('read_public_questions', () => repository.getPublicQuestions()),
+    getScoringQuestions: () =>
+      observe('read_scoring_questions', () => repository.getScoringQuestions()),
+    saveAttempt: (studentId, score) =>
+      observe('save_attempt', () => repository.saveAttempt(studentId, score)),
+  }
+}

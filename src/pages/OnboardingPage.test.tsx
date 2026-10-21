@@ -14,6 +14,10 @@ const mock = vi.hoisted(() => ({
   retryProfile: vi.fn(),
 }))
 vi.mock('../lib/supabase', () => ({ supabase: {}, authRedirectError: null }))
+vi.mock('../assessment/assessment-api', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../assessment/assessment-api')>()),
+  getLatestAssessment: vi.fn(async () => null),
+}))
 vi.mock('../onboarding/profile-preferences', () => ({
   loadStudentPreferences: mock.load,
   saveStudentPreferences: mock.save,
@@ -147,9 +151,7 @@ describe('onboarding form', () => {
       },
       expect.any(AbortSignal),
     )
-    expect(screen.getByRole('status').textContent).toContain(
-      'preferences are saved',
-    )
+    expect(screen.getByText(/Your learning preferences are saved/)).toBeTruthy()
     expect(mock.retryProfile).toHaveBeenCalledTimes(1)
   })
   it('waits for save success before navigation and blocks duplicate submissions', async () => {

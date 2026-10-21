@@ -1,6 +1,8 @@
 node_modules/
 dist/
 .vercel/
+supabase/.temp/
+supabase/.branches/
 .env
 .env.*
 !.env.example

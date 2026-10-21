@@ -2,7 +2,7 @@
 
 SkillBridge is a personalized financial literacy recommendation and learning platform designed for high school students.
 
-Built for students ages 14–18 and Neighborhood Hacks 2026 (submission deadline: October 23, 2026). The frontend foundation, Supabase email/password authentication, and student onboarding are implemented. Assessment, recommendations, and resource search remain placeholder interfaces.
+Built for students ages 14–18 and Neighborhood Hacks 2026 (submission deadline: October 23, 2026). The frontend foundation, Supabase authentication, student onboarding, and assessment implementation are complete locally. The assessment's two Edge Functions require deployment before live use. Recommendations and resource search remain placeholders.
 
 ## Local setup
 
@@ -55,6 +55,8 @@ Profile creation requires the existing INSERT policy and table permission; updat
 
 ## Commands
 
+For assessment setup, exact Edge Function deployment commands, security details, and live test steps, see [supabase/README.md](supabase/README.md). Writing the function files does not deploy them. No database schema or RLS changes are required.
+
 | Command          | Purpose                                             |
 | ---------------- | --------------------------------------------------- |
 | `pnpm dev`       | Start Vite with hot reload                          |
@@ -75,6 +77,7 @@ React 19, Vite 6, TypeScript 5, React Router 7, Tailwind CSS 4, and the Supabase
 ```text
 src/
   app/App.tsx              Route definitions
+  assessment/             Public assessment API/types, quiz, results, tests
   auth/                    Session provider, route guard, account controls, profile access, tests
   components/             Shared shell, icons, headings, preview notices
   lib/supabase.ts          Public environment configuration and client
@@ -90,21 +93,21 @@ src/
 | `/`                   | Redirects to onboarding                                 |
 | `/login`, `/register` | Email/password login and registration                   |
 | `/onboarding`         | Load, validate, create, and edit learning preferences   |
-| `/assessment`         | Knowledge check overview; no questions or answer keys   |
+| `/assessment`         | Secure 10-question quiz and persisted own results       |
 | `/resources`          | Disabled search/filter controls and empty library state |
 | `/recommendations`    | Explanation of the future personalized learning path    |
 | Other paths           | Accessible not-found page with return link              |
 
-Navigation exposes all five areas. Anonymous visitors to protected pages are redirected to login and returned to the requested page after authentication. Signed-in students are redirected away from login/registration. The shell preserves active navigation states, a skip link, route focus management, visible keyboard focus, and responsive layouts. Quiz questions/scoring, search, and recommendation logic are intentionally unimplemented. No real student data or fake results are included in source or tests.
+Navigation exposes all five areas. Anonymous visitors to protected pages are redirected to login and returned to the requested page after authentication. Signed-in students are redirected away from login/registration. The shell preserves active navigation states, a skip link, route focus management, visible keyboard focus, and responsive layouts. The assessment fetches only public question fields from an authenticated Edge Function, sends choices to server-side scoring, and restores the latest saved own result after refresh. Search and recommendation ranking remain unimplemented. Tests use synthetic fixtures; no real student data or real answer keys are included.
 
 ## Security and existing infrastructure
 
 - Every `VITE_*` value is public and can appear in browser bundles. Never add a database password, service-role key, `sb_secret_` key, or answer key to frontend files or Vite variables.
 - `.env`, `.env.*`, `*.local`, common key files, and secret directories are ignored. `.env.example` contains only public placeholders and is intentionally tracked.
-- No Supabase tables, permissions, or RLS policies are created or changed. Authentication creates users through Supabase Auth; application-table writes are limited to students' own default profiles and their onboarding preferences.
+- No Supabase tables, permissions, or RLS policies are created or changed. Browser writes remain limited to students' own profiles/preferences. Assessment attempts are inserted only by the authenticated scoring Edge Function, using verified identity and server-calculated scores.
 - RLS remains the authorization boundary. Client route guards provide navigation behavior, not database security. No assessment questions, answer keys, attempts, or resources are fetched by authentication.
 - Passwords exist only in the account form and are cleared after submission; they are never logged. The SDK owns session persistence and token refresh. No custom token storage is introduced.
-- Edge Functions, assessment scoring, resource search, and recommendation logic remain outside this task.
+- Server-only scoring and privileged table access are confined to `supabase/functions/`; those files are never imported into the frontend. The browser cannot directly read the question bank or write assessment attempts. Resource search and recommendation ranking remain outside this task.
 
 ## Verification
 
@@ -133,4 +136,4 @@ Import this repository using the Vite preset. Build command: `pnpm build`; outpu
 - [Supabase client initialization](https://supabase.com/docs/reference/javascript/initializing)
 - [Supabase API key guidance](https://supabase.com/docs/guides/getting-started/api-keys)
 
-Task 4, commits, and pushes require separate approval.
+Task 5, commits, and pushes require separate approval. Recommendation ranking is reserved for Task 6.

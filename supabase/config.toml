@@ -1,0 +1,9 @@
+project_id = "skillbridge"
+
+[functions.assessment-questions]
+verify_jwt = true
+import_map = "./functions/deno.json"
+
+[functions.submit-assessment]
+verify_jwt = true
+import_map = "./functions/deno.json"
