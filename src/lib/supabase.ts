@@ -22,6 +22,26 @@ function isPublicConfiguration() {
 
 export const isSupabaseConfigured = isPublicConfiguration()
 
-// No requests are made by the placeholder pages. Never put privileged keys in VITE_* variables.
-// A null client lets the frontend preview run before public configuration is supplied.
-export const supabase = isSupabaseConfigured ? createClient(url!, key!) : null
+// Capture failed confirmation redirects before the SDK cleans the URL. Never
+// display error_description or other URL contents, which are untrusted input.
+const callbackParameters = [
+  new URLSearchParams(window.location.search),
+  new URLSearchParams(window.location.hash.slice(1)),
+]
+export const authRedirectError = callbackParameters.some(
+  (parameters) => parameters.has('error') || parameters.has('error_code'),
+)
+  ? 'That confirmation link is invalid or has expired. Try logging in if you already confirmed your email, or register again to request a new link.'
+  : null
+
+// Never put privileged keys in VITE_* variables. The SDK manages session storage,
+// refresh, and email-confirmation redirects; application code never logs tokens.
+export const supabase = isSupabaseConfigured
+  ? createClient(url!, key!, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+      },
+    })
+  : null

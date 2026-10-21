@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { Icon } from './Icon'
 import type { IconName } from './Icon'
+import { AccountControls } from '../auth/AccountControls'
 const navigation: { to: string; label: string; icon: IconName }[] = [
   { to: '/onboarding', label: 'Your starting point', icon: 'compass' },
   { to: '/assessment', label: 'Knowledge check', icon: 'book' },
@@ -67,13 +68,7 @@ export function AppShell() {
             Money skills you can use today, and carry into tomorrow.
           </p>
         </div>
-        <NavLink
-          to="/login"
-          className="m-4 flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-muted hover:bg-mint"
-        >
-          <Icon name="user" />
-          Log in / Sign up
-        </NavLink>
+        <AccountControls />
       </aside>
       <div className="lg:ml-64">
         <header className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-white px-6 py-5 lg:px-10">
@@ -81,7 +76,7 @@ export function AppShell() {
             Your future starts with a little know-how.
           </p>
           <span className="rounded-full border border-line px-3 py-1 text-xs font-medium text-muted">
-            Foundation preview
+            Student learning space
           </span>
         </header>
         <main
