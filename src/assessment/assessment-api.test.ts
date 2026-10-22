@@ -14,6 +14,7 @@ function fixture() {
   const chain = {
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
+    not: vi.fn().mockReturnThis(),
     order: vi.fn().mockReturnThis(),
     limit: vi.fn().mockReturnThis(),
     abortSignal: vi.fn().mockReturnThis(),
@@ -83,6 +84,12 @@ describe('frontend assessment API', () => {
     expect(chain.order).toHaveBeenCalledWith('completed_at', {
       ascending: false,
     })
+    expect(chain.not).toHaveBeenCalledExactlyOnceWith(
+      'completed_at',
+      'is',
+      null,
+    )
+    expect(chain.order).toHaveBeenCalledWith('id', { ascending: false })
     expect(chain.limit).toHaveBeenCalledWith(1)
   })
   it('returns null for no previous attempt and rejects missing identity', async () => {

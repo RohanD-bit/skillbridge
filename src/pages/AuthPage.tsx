@@ -6,7 +6,13 @@ import { useAuth } from '../auth/auth-context'
 import { authErrorMessage, configurationMessage } from '../auth/auth-errors'
 import { authRedirectError } from '../lib/supabase'
 
-const destinations = new Set(['/onboarding', '/assessment', '/recommendations'])
+const destinations = new Set([
+  '/',
+  '/onboarding',
+  '/assessment',
+  '/recommendations',
+  '/resources',
+])
 
 export function AuthPage({ register = false }: { register?: boolean }) {
   const auth = useAuth()
@@ -15,7 +21,7 @@ export function AuthPage({ register = false }: { register?: boolean }) {
   const destination =
     typeof requested === 'string' && destinations.has(requested)
       ? requested
-      : '/onboarding'
+      : '/'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [pending, setPending] = useState(false)

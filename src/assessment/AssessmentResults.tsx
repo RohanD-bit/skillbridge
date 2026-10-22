@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useEffect, useRef } from 'react'
 import { topicLabels } from './types'
 import type { AssessmentResult, Topic } from './types'
 
@@ -9,13 +10,22 @@ export function AssessmentResults({
   result: AssessmentResult
   onRetake: () => void
 }) {
+  const heading = useRef<HTMLHeadingElement>(null)
+  useEffect(() => {
+    heading.current?.focus()
+  }, [result.attempt_id])
   const percent = Math.round(
     (result.correct_answers / result.total_questions) * 100,
   )
   return (
     <section className="card max-w-3xl" aria-labelledby="results-heading">
       <p className="eyebrow">Your saved knowledge check</p>
-      <h2 id="results-heading" className="mt-3 text-2xl font-semibold">
+      <h2
+        ref={heading}
+        tabIndex={-1}
+        id="results-heading"
+        className="mt-3 text-2xl font-semibold"
+      >
         A starting point for your next step.
       </h2>
       <p role="status" className="mt-5 text-3xl font-semibold text-forest">

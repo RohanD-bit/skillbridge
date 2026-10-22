@@ -179,6 +179,7 @@ export async function getLatestAssessment(
         'id, total_questions, correct_answers, topic_scores, completed_at',
       )
       .eq('student_id', studentId)
+      .not('completed_at', 'is', null)
       .order('completed_at', { ascending: false })
       .order('id', { ascending: false })
       .limit(1)

@@ -9,8 +9,8 @@ export function NotFoundPage() {
       >
         This page doesn’t exist. Your learning space is just a step away.
       </PageIntro>
-      <Link to="/onboarding" className="button inline-flex">
-        Back to your starting point
+      <Link to="/" className="button inline-flex">
+        Back to your learning space
       </Link>
     </>
   )

@@ -30,7 +30,7 @@ export function AppShell() {
       </a>
       <aside className="border-b border-line bg-white lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-64 lg:flex-col lg:overflow-y-auto lg:border-r lg:border-b-0">
         <Link
-          to="/onboarding"
+          to="/"
           aria-label="SkillBridge home"
           className="flex items-center gap-3 px-6 py-7 text-xl font-bold tracking-tight"
         >

@@ -1,4 +1,5 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
+import { StudentStart } from './StudentStart'
 import { AppShell } from '../components/AppShell'
 import { AuthPage } from '../pages/AuthPage'
 import { OnboardingPage } from '../pages/OnboardingPage'
@@ -11,10 +12,10 @@ export function App() {
   return (
     <Routes>
       <Route element={<AppShell />}>
-        <Route index element={<Navigate to="/onboarding" replace />} />
         <Route path="login" element={<AuthPage key="login" />} />
         <Route path="register" element={<AuthPage key="register" register />} />
         <Route element={<RequireAuth />}>
+          <Route index element={<StudentStart />} />
           <Route path="onboarding" element={<OnboardingPage />} />
           <Route path="assessment" element={<AssessmentPage />} />
           <Route path="recommendations" element={<RecommendationsPage />} />

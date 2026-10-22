@@ -3,7 +3,8 @@
 `ranking.ts` contains pure TypeScript functions. `recommendations-api.ts` reads
 the student's data and passes it to the engine. The protected Recommendations
 page shows up to five results using the existing resource card. The complete
-results-page design and journey refinement remain Task 7.
+journey is integrated in Task 7; see the root `DEMO_GUIDE.md` for its recording
+sequence and recovery checks. The ranking rules remain unchanged.
 
 ## Scoring
 
@@ -135,5 +136,6 @@ With the existing development server and dedicated test accounts:
 Known limits: rules are hand-selected; goal matching is literal English keyword
 matching; a small catalog limits diversity; there is no history-based
 personalization or outcome learning. Catalog size inherits the existing Data API
-response limit; larger catalogs need pagination. Task 7 will refine presentation
-and the full journey. No commits, pushes, or deployments are part of Task 6.
+response limit; larger catalogs need pagination. The integrated journey and demo
+checks are documented in the root `DEMO_GUIDE.md`. Task 8 handles deployment and
+final stabilization.

@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { normalizePreferences, validatePreferences } from './preferences'
+import {
+  hasCompletePreferences,
+  normalizePreferences,
+  validatePreferences,
+} from './preferences'
 
 const valid = {
   interests: ['budgeting', 'saving'],
@@ -8,6 +12,22 @@ const valid = {
 }
 
 describe('onboarding validation', () => {
+  it('recognizes saved, valid preferences without requiring a new completion flag', () => {
+    expect(hasCompletePreferences(valid)).toBe(true)
+  })
+  it.each([
+    null,
+    {},
+    { ...valid, interests: [] },
+    { ...valid, interests: 'saving' },
+    { ...valid, interests: [5] },
+    { ...valid, learning_goal: null },
+    { ...valid, learning_goal: '   ' },
+    { ...valid, experience_level: null },
+    { ...valid, experience_level: 'expert' },
+  ])('does not skip incomplete or malformed onboarding %#', (profile) => {
+    expect(hasCompletePreferences(profile)).toBe(false)
+  })
   it('accepts multiple allowed interests and every valid experience level', () => {
     for (const experience_level of ['beginner', 'intermediate', 'advanced']) {
       expect(validatePreferences({ ...valid, experience_level })).toEqual({})

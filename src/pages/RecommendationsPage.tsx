@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
 import { PageIntro } from '../components/PageIntro'
+import { PreferencesReminder } from '../components/PreferencesReminder'
 import { supabase } from '../lib/supabase'
 import { ResourceCard } from '../resources/ResourceCard'
 import {
@@ -12,8 +13,12 @@ import type { RecommendationData } from '../recommendations/recommendations-api'
 
 export function RecommendationsPage() {
   const { user } = useAuth()
+  const location = useLocation()
   return user ? (
-    <RecommendationWorkspace key={user.id} studentId={user.id} />
+    <RecommendationWorkspace
+      key={`${user.id}:${location.key}`}
+      studentId={user.id}
+    />
   ) : null
 }
 type RecommendationState =
@@ -85,6 +90,27 @@ function RecommendationWorkspace({ studentId }: { studentId: string }) {
         A starting point for your next lesson, based on your saved preferences
         and latest knowledge check. Each suggestion explains how it was ranked.
       </PageIntro>
+      <PreferencesReminder />
+      <nav
+        aria-label="Learning path actions"
+        className="mb-6 flex flex-wrap items-center gap-3"
+      >
+        <Link to="/resources" className="button inline-flex items-center">
+          Explore resources
+        </Link>
+        <Link
+          to="/onboarding"
+          className="min-h-12 rounded-xl border border-line px-5 py-3 text-sm font-semibold text-forest hover:bg-mint"
+        >
+          Edit preferences
+        </Link>
+        <Link
+          to="/assessment"
+          className="min-h-12 rounded-xl border border-line px-5 py-3 text-sm font-semibold text-forest hover:bg-mint"
+        >
+          View results or retake assessment
+        </Link>
+      </nav>
       {state.phase === 'loading' ? (
         <p role="status" className="card">
           Finding resources for your learning path…

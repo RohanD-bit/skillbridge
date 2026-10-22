@@ -1,4 +1,4 @@
-import { Navigate, Outlet, useLocation } from 'react-router-dom'
+import { Link, Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from './auth-context'
 export function RequireAuth() {
   const auth = useAuth()
@@ -41,13 +41,15 @@ export function RequireAuth() {
         >
           Retry profile
         </button>
+        <Link
+          to="/resources"
+          className="mt-4 block text-sm font-semibold text-forest underline"
+        >
+          Explore resources while you wait
+        </Link>
       </div>
     )
-  if (!auth.profile)
-    return (
-      <p role="status" className="card">
-        Preparing your learning space…
-      </p>
-    )
+  if (!auth.profile && location.pathname !== '/onboarding')
+    return <Navigate to="/onboarding" replace />
   return <Outlet />
 }

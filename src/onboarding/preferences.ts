@@ -49,6 +49,28 @@ export type PreferenceErrors = Partial<
 >
 export const goalLimit = 300
 
+// Completion is inferred from existing fields; no database flag is required.
+export function hasCompletePreferences(profile: unknown): boolean {
+  if (!profile || typeof profile !== 'object') return false
+  const values = profile as Record<string, unknown>
+  if (
+    !Array.isArray(values.interests) ||
+    !values.interests.every((interest) => typeof interest === 'string') ||
+    typeof values.learning_goal !== 'string' ||
+    typeof values.experience_level !== 'string'
+  )
+    return false
+  return (
+    Object.keys(
+      validatePreferences({
+        interests: values.interests,
+        learning_goal: values.learning_goal,
+        experience_level: values.experience_level,
+      }),
+    ).length === 0
+  )
+}
+
 export function validatePreferences(
   values: LearningPreferences,
 ): PreferenceErrors {

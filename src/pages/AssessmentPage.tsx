@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useAuth } from '../auth/auth-context'
 import { PageIntro } from '../components/PageIntro'
+import { PreferencesReminder } from '../components/PreferencesReminder'
 import { supabase } from '../lib/supabase'
 import {
   AssessmentError,
@@ -184,6 +185,7 @@ function AssessmentWorkspace({ studentId }: { studentId: string }) {
         Explore what you already know and discover where you can grow. You don’t
         need to prepare or know every answer.
       </PageIntro>
+      <PreferencesReminder />
       {phase === 'latest' &&
         (latestError ? (
           <div className="card max-w-3xl">

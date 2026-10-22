@@ -2,7 +2,7 @@
 
 SkillBridge is a personalized financial literacy recommendation and learning platform designed for high school students.
 
-Built for students ages 14–18 and Neighborhood Hacks 2026 (submission deadline: October 23, 2026). The frontend foundation, Supabase authentication, student onboarding, assessment, resource catalog, and explainable recommendation engine are implemented. Assessment functions must be deployed to the connected project for live scoring. The complete recommendation-page design and user-journey refinement remain Task 7.
+Built for students ages 14–18 and Neighborhood Hacks 2026 (submission deadline: October 23, 2026). Authentication, onboarding, assessment, resource search, and explainable recommendations are integrated into a complete student journey. Assessment functions must be deployed to the connected project for live scoring. Task 8 covers deployment and final stabilization; no Vercel deployment has been performed here.
 
 ## Local setup
 
@@ -31,6 +31,15 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_your_public_key_here
 Use the project URL and **publishable key** from the Supabase dashboard. Restart Vite after environment changes. `src/lib/supabase.ts` exports the existing shared client, or `null` if configuration is missing, invalid, or still contains example placeholders. A publishable key is required; legacy JWT keys are intentionally not accepted.
 
 ## Authentication configuration
+
+The default home/login destination resumes the student's saved stage:
+incomplete preferences open onboarding; complete preferences open Knowledge
+check, which restores the latest completed result or offers a new assessment.
+Students can explicitly edit preferences through Your starting point. Login
+preserves allowlisted return destinations, including the independent resource
+library. Missing-profile/loading errors have recovery actions instead of an
+endless loading state. The existing auth provider still restores sessions and
+creates a default own profile if necessary.
 
 In the existing Supabase project's Authentication settings, verify that the Email provider and new-user signups are enabled. Keep email confirmation enabled for the intended registration flow. Configure the Site URL for your frontend and allow the exact confirmation redirect URLs for development and production, such as `http://localhost:5173/onboarding` and `https://your-deployment.example/onboarding`. Use the actual origin/port printed by Vite. Registration requests confirmation redirects to the current origin's `/onboarding` page; the shared client handles the returned session. If confirmation is disabled in Supabase, successful registration signs in immediately.
 
@@ -101,8 +110,26 @@ existing onboarding, assessment, or catalog workflow.
 See [the recommendation rules and live testing guide](src/recommendations/README.md)
 for the compatibility matrix, keyword rules, neutral defaults, deterministic
 tie-breaking, privacy details, limitations, and manual integration checks. Scores
-compare resources; they are not probabilities of success. Full results-page and
-journey refinements are reserved for Task 7.
+compare resources; they are not probabilities of success. Recommendations provide
+clear actions to explore the catalog, edit preferences, or view results/retake.
+Every navigation into For you (including the same route) reloads current inputs;
+there is no cache of a previous assessment's recommendations.
+
+## Integrated journey and demo
+
+The normal flow is **Login → Onboarding → Knowledge check → Saved results →
+For you → Explore resources**. Returning students resume saved results instead
+of being forced to repeat completed onboarding. Onboarding redirects only after
+a confirmed save; the assessment displays server-confirmed results before
+offering Continue to recommendations. Both assessment readers select the latest
+completed own attempt, excluding null completion times and breaking ties by
+descending ID. Retakes immediately replace results after successful submission.
+
+See [DEMO_GUIDE.md](DEMO_GUIDE.md) for the exact recording sequence, navigation
+label map, fictional preference example, prerequisites, recovery instructions,
+keyboard/mobile checks, and full manual acceptance checklist. No guest mode,
+new database fields, authentication replacement, scoring changes, or deployments
+are included. The recommendation algorithm is unchanged.
 
 ## Commands
 
@@ -143,7 +170,7 @@ src/
 
 | Route                 | Preview                                               |
 | --------------------- | ----------------------------------------------------- |
-| `/`                   | Redirects to onboarding                               |
+| `/`                   | Resumes onboarding or saved assessment by preferences |
 | `/login`, `/register` | Email/password login and registration                 |
 | `/onboarding`         | Load, validate, create, and edit learning preferences |
 | `/assessment`         | Secure 10-question quiz and persisted own results     |
@@ -216,4 +243,4 @@ Import this repository using the Vite preset. Build command: `pnpm build`; outpu
 - [Supabase client initialization](https://supabase.com/docs/reference/javascript/initializing)
 - [Supabase API key guidance](https://supabase.com/docs/guides/getting-started/api-keys)
 
-Commits, pushes, and Task 7 require separate approval.
+Commits, pushes, deployments, and Task 8 require separate approval.
