@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Icon } from '../components/Icon'
 import {
   resourceDifficulties,
@@ -7,7 +8,13 @@ import {
 } from './catalog'
 import type { LearningResource } from './catalog'
 
-export function ResourceCard({ resource }: { resource: LearningResource }) {
+export function ResourceCard({
+  resource,
+  children,
+}: {
+  resource: LearningResource
+  children?: ReactNode
+}) {
   const href = safeResourceUrl(resource.url)
   const titleId = `resource-${resource.id}`
   return (
@@ -44,6 +51,7 @@ export function ResourceCard({ resource }: { resource: LearningResource }) {
           </dd>
         </div>
       </dl>
+      {children}
       <div className="mt-auto pt-6">
         {href ? (
           <a

@@ -2,7 +2,7 @@
 
 SkillBridge is a personalized financial literacy recommendation and learning platform designed for high school students.
 
-Built for students ages 14–18 and Neighborhood Hacks 2026 (submission deadline: October 23, 2026). The frontend foundation, Supabase authentication, student onboarding, assessment, and resource catalog are implemented. Assessment functions must be deployed to the connected project for live scoring. Recommendation ranking remains a placeholder.
+Built for students ages 14–18 and Neighborhood Hacks 2026 (submission deadline: October 23, 2026). The frontend foundation, Supabase authentication, student onboarding, assessment, resource catalog, and explainable recommendation engine are implemented. Assessment functions must be deployed to the connected project for live scoring. The complete recommendation-page design and user-journey refinement remain Task 7.
 
 ## Local setup
 
@@ -82,6 +82,28 @@ result count are included. Requests time out after 15 seconds, are cancelled on
 unmount/account changes, and cannot populate a different account's catalog.
 Account changes reset results and filters; signing out immediately hides them.
 
+## Personalized recommendations
+
+Open **For you** (`/recommendations`) after signing in. The engine ranks active
+resources using 45% topic knowledge gap, 35% difficulty compatibility, and 20%
+interest/learning-goal alignment. It displays up to five recommendations with
+numerical ranking scores and explanations, using the student's saved preferences
+and latest completed assessment. Missing topic evidence uses a neutral value,
+without assuming poor knowledge; missing preferences use explicit accessible
+defaults. A failed read shows an error rather than silently inventing defaults.
+
+The read-only loader derives private selectors from Supabase Auth's verified
+identity and keeps existing RLS. It reuses the profile and resource readers and
+does not query assessment answer keys. No new Edge Function, dependency, database
+permission, or environment variable is required. Task 6 does not change the
+existing onboarding, assessment, or catalog workflow.
+
+See [the recommendation rules and live testing guide](src/recommendations/README.md)
+for the compatibility matrix, keyword rules, neutral defaults, deterministic
+tie-breaking, privacy details, limitations, and manual integration checks. Scores
+compare resources; they are not probabilities of success. Full results-page and
+journey refinements are reserved for Task 7.
+
 ## Commands
 
 For assessment setup, exact Edge Function deployment commands, security details, and live test steps, see [supabase/README.md](supabase/README.md). Writing the function files does not deploy them. No database schema or RLS changes are required.
@@ -112,6 +134,7 @@ src/
   lib/supabase.ts          Public environment configuration and client
   onboarding/             Preference options, validation, scoped persistence, tests
   resources/              Read-only catalog API, filters, safe cards, synthetic fixtures, tests
+  recommendations/        Pure ranking rules, own-data loader, tests, algorithm guide
   pages/                  Route-level interfaces and integration tests
   styles/index.css        Tailwind import, theme, shared component styles
   main.tsx                React and browser-router entry point
@@ -125,10 +148,10 @@ src/
 | `/onboarding`         | Load, validate, create, and edit learning preferences |
 | `/assessment`         | Secure 10-question quiz and persisted own results     |
 | `/resources`          | Public landing; authenticated resource catalog/search |
-| `/recommendations`    | Explanation of the future personalized learning path  |
+| `/recommendations`    | Top-five explainable ranking using own saved data     |
 | Other paths           | Accessible not-found page with return link            |
 
-Navigation exposes all five areas. Anonymous visitors to protected pages are redirected to login and returned to the requested page after authentication. Signed-in students are redirected away from login/registration. The shell preserves active navigation states, a skip link, route focus management, visible keyboard focus, and responsive layouts. The assessment fetches only public question fields from an authenticated Edge Function, sends choices to server-side scoring, and restores the latest saved own result after refresh. Resources support keyword search and combined filters; recommendation ranking remains unimplemented. Tests use synthetic fixtures; no real student data or real answer keys are included.
+Navigation exposes all five areas. Anonymous visitors to protected pages are redirected to login and returned to the requested page after authentication. Signed-in students are redirected away from login/registration. The shell preserves active navigation states, a skip link, route focus management, visible keyboard focus, and responsive layouts. The assessment fetches only public question fields from an authenticated Edge Function, sends choices to server-side scoring, and restores the latest saved own result after refresh. Resources support keyword search and combined filters; recommendations use saved preferences and topic scores with explicit explanations. Tests use synthetic fixtures; no real student data or real answer keys are included.
 
 ## Security and existing infrastructure
 
@@ -137,7 +160,7 @@ Navigation exposes all five areas. Anonymous visitors to protected pages are red
 - No Supabase tables, permissions, or RLS policies are created or changed. Browser writes remain limited to students' own profiles/preferences. Assessment attempts are inserted only by the authenticated scoring Edge Function, using verified identity and server-calculated scores.
 - RLS remains the authorization boundary. Client route guards provide navigation behavior, not database security. No assessment questions, answer keys, attempts, or resources are fetched by authentication.
 - Passwords exist only in the account form and are cleared after submission; they are never logged. The SDK owns session persistence and token refresh. No custom token storage is introduced.
-- Server-only scoring and privileged table access remain outside the frontend. The browser cannot directly read the question bank or write assessment attempts. The catalog only reads active learning resources under the existing RLS; recommendation ranking remains outside this task.
+- Assessment scoring and privileged table access remain outside the frontend. The browser cannot directly read the question bank or write assessment attempts. The catalog reads active learning resources under existing RLS. Recommendation ranking is read-only, based on the verified student's own profile/topic scores and active resources; no secret keys are used.
 
 ## Verification
 
@@ -193,4 +216,4 @@ Import this repository using the Vite preset. Build command: `pnpm build`; outpu
 - [Supabase client initialization](https://supabase.com/docs/reference/javascript/initializing)
 - [Supabase API key guidance](https://supabase.com/docs/guides/getting-started/api-keys)
 
-Commits, pushes, and Task 6 require separate approval. Recommendation ranking is reserved for Task 6.
+Commits, pushes, and Task 7 require separate approval.
