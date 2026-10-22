@@ -2,7 +2,7 @@
 
 SkillBridge is a personalized financial literacy recommendation and learning platform designed for high school students.
 
-Built for students ages 14–18 and Neighborhood Hacks 2026 (submission deadline: October 23, 2026). The frontend foundation, Supabase authentication, student onboarding, and assessment implementation are complete locally. The assessment's two Edge Functions require deployment before live use. Recommendations and resource search remain placeholders.
+Built for students ages 14–18 and Neighborhood Hacks 2026 (submission deadline: October 23, 2026). The frontend foundation, Supabase authentication, student onboarding, assessment, and resource catalog are implemented. Assessment functions must be deployed to the connected project for live scoring. Recommendation ranking remains a placeholder.
 
 ## Local setup
 
@@ -13,7 +13,7 @@ pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Open the local URL printed by Vite (normally http://localhost:5173). Resource search remains public. Onboarding, assessment, and recommendations require a signed-in student and a loaded profile. Without public configuration, account controls show setup instructions and cannot submit credentials.
+Open the local URL printed by Vite (normally http://localhost:5173). The resource landing page is public; students sign in before loading the catalog. Onboarding, assessment, and recommendations require a signed-in student and a loaded profile. Without public configuration, account controls show setup instructions and cannot submit credentials.
 
 If `.env.local` is not already configured, copy `.env.example` to `.env.local` (do not overwrite an existing local configuration):
 
@@ -53,6 +53,35 @@ Persistence uses the existing authenticated client and a scoped `update(...).eq(
 
 Profile creation requires the existing INSERT policy and table permission; updates require the existing UPDATE and SELECT policies. If an operation is denied, the UI reports an error without changing policies. No additional environment variables or dependencies are required. Requests are cancelled when the page closes or the account changes, and late responses cannot populate another account's form or redirect it.
 
+## Resource catalog
+
+Open **Explore resources** (`/resources`) after signing in. The catalog reads only
+the existing `learning_resources` table using the authenticated public Supabase
+client, an explicit field projection, and `is_active = true`. Existing SELECT
+permissions and RLS remain required and unchanged. It performs no writes and
+requires no new secrets, Edge Functions, dependencies, or database setup.
+
+Search matches title or description case-insensitively, treating input as literal
+text. Topic, difficulty, and resource-type filters combine with search; Clear
+Filters resets all four controls. Filtering happens locally after the small
+catalog loads, without further database requests or recommendation ranking.
+Resources are sorted by title and ID. The catalog does not hard-code ten rows;
+it displays the active resources returned by Supabase. For a much larger catalog,
+add server-side filtering and pagination; the current implementation uses the
+project's existing Data API response limit (normally 1,000 rows).
+
+Cards include provider, topic, difficulty, type, description, and an external
+resource link. Only absolute HTTPS links without embedded credentials are
+clickable, with `noopener noreferrer` and a new-tab announcement. Unsafe or
+missing URLs show a non-clickable message while preserving the card. Nullable
+descriptions and providers have display fallbacks. Database text renders as plain
+React text, never HTML.
+
+Loading, safe errors with retry, an empty library, no matching results, and a live
+result count are included. Requests time out after 15 seconds, are cancelled on
+unmount/account changes, and cannot populate a different account's catalog.
+Account changes reset results and filters; signing out immediately hides them.
+
 ## Commands
 
 For assessment setup, exact Edge Function deployment commands, security details, and live test steps, see [supabase/README.md](supabase/README.md). Writing the function files does not deploy them. No database schema or RLS changes are required.
@@ -62,7 +91,7 @@ For assessment setup, exact Edge Function deployment commands, security details,
 | `pnpm dev`       | Start Vite with hot reload                          |
 | `pnpm typecheck` | Check frontend and Vite TypeScript configuration    |
 | `pnpm lint`      | Check TypeScript and React hooks with ESLint        |
-| `pnpm test`      | Run mocked authentication and profile tests         |
+| `pnpm test`      | Run mocked app, resource, and Edge Function tests   |
 | `pnpm build`     | Type-check and generate production files in `dist/` |
 | `pnpm preview`   | Serve the production build locally                  |
 
@@ -82,23 +111,24 @@ src/
   components/             Shared shell, icons, headings, preview notices
   lib/supabase.ts          Public environment configuration and client
   onboarding/             Preference options, validation, scoped persistence, tests
-  pages/                  Route-level placeholder interfaces
+  resources/              Read-only catalog API, filters, safe cards, synthetic fixtures, tests
+  pages/                  Route-level interfaces and integration tests
   styles/index.css        Tailwind import, theme, shared component styles
   main.tsx                React and browser-router entry point
   vite-env.d.ts           Typed public environment variables
 ```
 
-| Route                 | Preview                                                 |
-| --------------------- | ------------------------------------------------------- |
-| `/`                   | Redirects to onboarding                                 |
-| `/login`, `/register` | Email/password login and registration                   |
-| `/onboarding`         | Load, validate, create, and edit learning preferences   |
-| `/assessment`         | Secure 10-question quiz and persisted own results       |
-| `/resources`          | Disabled search/filter controls and empty library state |
-| `/recommendations`    | Explanation of the future personalized learning path    |
-| Other paths           | Accessible not-found page with return link              |
+| Route                 | Preview                                               |
+| --------------------- | ----------------------------------------------------- |
+| `/`                   | Redirects to onboarding                               |
+| `/login`, `/register` | Email/password login and registration                 |
+| `/onboarding`         | Load, validate, create, and edit learning preferences |
+| `/assessment`         | Secure 10-question quiz and persisted own results     |
+| `/resources`          | Public landing; authenticated resource catalog/search |
+| `/recommendations`    | Explanation of the future personalized learning path  |
+| Other paths           | Accessible not-found page with return link            |
 
-Navigation exposes all five areas. Anonymous visitors to protected pages are redirected to login and returned to the requested page after authentication. Signed-in students are redirected away from login/registration. The shell preserves active navigation states, a skip link, route focus management, visible keyboard focus, and responsive layouts. The assessment fetches only public question fields from an authenticated Edge Function, sends choices to server-side scoring, and restores the latest saved own result after refresh. Search and recommendation ranking remain unimplemented. Tests use synthetic fixtures; no real student data or real answer keys are included.
+Navigation exposes all five areas. Anonymous visitors to protected pages are redirected to login and returned to the requested page after authentication. Signed-in students are redirected away from login/registration. The shell preserves active navigation states, a skip link, route focus management, visible keyboard focus, and responsive layouts. The assessment fetches only public question fields from an authenticated Edge Function, sends choices to server-side scoring, and restores the latest saved own result after refresh. Resources support keyword search and combined filters; recommendation ranking remains unimplemented. Tests use synthetic fixtures; no real student data or real answer keys are included.
 
 ## Security and existing infrastructure
 
@@ -107,7 +137,7 @@ Navigation exposes all five areas. Anonymous visitors to protected pages are red
 - No Supabase tables, permissions, or RLS policies are created or changed. Browser writes remain limited to students' own profiles/preferences. Assessment attempts are inserted only by the authenticated scoring Edge Function, using verified identity and server-calculated scores.
 - RLS remains the authorization boundary. Client route guards provide navigation behavior, not database security. No assessment questions, answer keys, attempts, or resources are fetched by authentication.
 - Passwords exist only in the account form and are cleared after submission; they are never logged. The SDK owns session persistence and token refresh. No custom token storage is introduced.
-- Server-only scoring and privileged table access are confined to `supabase/functions/`; those files are never imported into the frontend. The browser cannot directly read the question bank or write assessment attempts. Resource search and recommendation ranking remain outside this task.
+- Server-only scoring and privileged table access remain outside the frontend. The browser cannot directly read the question bank or write assessment attempts. The catalog only reads active learning resources under the existing RLS; recommendation ranking remains outside this task.
 
 ## Verification
 
@@ -125,6 +155,33 @@ For onboarding, use dedicated test accounts and synthetic goals:
 6. Switch between two test accounts and verify their preferences stay separate. With an authorized test session, verify the existing RLS denies reading/updating the other test account's ID; do not change any policies.
 7. If testing a missing profile, use an authorized disposable test account rather than deleting an existing row. Confirm creation either succeeds under the existing INSERT policy or displays a controlled error.
 
+## Manual resource integration check
+
+1. Visit `/resources` signed out. Confirm the sign-in prompt appears and no
+   `learning_resources` request is made. Sign in through that link and confirm
+   you return to `/resources`.
+2. Confirm all ten existing active resources load with title, description,
+   provider, topic, difficulty, type, and links. In the browser Network panel,
+   confirm the query targets only `learning_resources` and filters active rows.
+   Do not share request headers or tokens.
+3. Search a known title using different capitalization, then search a phrase
+   found only in a description. Check topic, difficulty, and type independently
+   and together. Confirm the count and Clear Filters behavior.
+4. Enter a keyword with no matches. Confirm the helpful empty-results message.
+5. Tab through the search, selects, Clear Filters, and Open Resource links.
+   Confirm visible focus, clear labels, and new-tab behavior. Check a narrow
+   mobile viewport and a wide desktop viewport for wrapping and grid layout.
+6. Use browser DevTools to go offline, reload the page, and confirm a safe error
+   with retry. Restore connectivity and retry successfully.
+7. Sign out or change test accounts while loading. Confirm old results do not
+   appear. Refresh while signed in and confirm the library reloads.
+8. Smoke-test onboarding and assessment, including saved results after refresh.
+   Existing resource RLS must hide inactive records. Do not alter rows, grants,
+   or policies to test this; automated fixtures cover inactive responses.
+
+Automated resource tests use synthetic fixtures and mocked Supabase responses;
+they do not verify the hosted catalog, RLS, or availability of external websites.
+
 ## Vercel
 
 Import this repository using the Vite preset. Build command: `pnpm build`; output directory: `dist`. `vercel.json` provides a single-page application fallback so React Router links work after direct navigation or refresh. Configure the two public environment variables in Vercel when integration is needed; no deployment is performed by this task.
@@ -136,4 +193,4 @@ Import this repository using the Vite preset. Build command: `pnpm build`; outpu
 - [Supabase client initialization](https://supabase.com/docs/reference/javascript/initializing)
 - [Supabase API key guidance](https://supabase.com/docs/guides/getting-started/api-keys)
 
-Task 5, commits, and pushes require separate approval. Recommendation ranking is reserved for Task 6.
+Commits, pushes, and Task 6 require separate approval. Recommendation ranking is reserved for Task 6.
