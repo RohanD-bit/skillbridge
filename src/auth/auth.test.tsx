@@ -103,6 +103,36 @@ beforeEach(() => {
 })
 
 describe('authentication routes and forms', () => {
+  it('explains the platform before signup and links to registration', async () => {
+    visit('/')
+    expect(
+      await screen.findByRole('heading', {
+        name: 'Money skills for the life ahead.',
+      }),
+    ).toBeTruthy()
+    expect(screen.getByRole('heading', { name: 'Our mission' })).toBeTruthy()
+    expect(screen.queryByLabelText('Email address')).toBeNull()
+    expect(document.title).toBe('Home · SkillBridge')
+    expect(mock.profile).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('link', { name: 'Get started' }))
+    expect(
+      await screen.findByRole('heading', { name: 'Start your next chapter.' }),
+    ).toBeTruthy()
+    expect(screen.getByLabelText('Email address')).toBeTruthy()
+  })
+  it('keeps the introduction available without a configured backend', async () => {
+    mock.configured = false
+    visit('/')
+    expect(
+      await screen.findByRole('heading', {
+        name: 'Money skills for the life ahead.',
+      }),
+    ).toBeTruthy()
+    expect(
+      screen.getByRole('link', { name: 'Get started' }).getAttribute('href'),
+    ).toBe('/register')
+    expect(mock.getSession).not.toHaveBeenCalled()
+  })
   it.each(['/onboarding', '/assessment', '/recommendations'])(
     'redirects an anonymous student from %s to login',
     async (path) => {

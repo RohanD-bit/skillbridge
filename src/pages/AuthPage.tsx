@@ -61,6 +61,12 @@ export function AuthPage({ register = false }: { register?: boolean }) {
       >
         A place to build practical money skills, one step at a time.
       </PageIntro>
+      <Link
+        to="/"
+        className="mb-6 inline-flex min-h-12 items-center text-sm font-semibold text-forest underline underline-offset-4"
+      >
+        Learn about SkillBridge
+      </Link>
       <div className="card max-w-xl">
         {!auth.configured && (
           <p role="alert" className="mb-6 text-sm leading-6">

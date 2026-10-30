@@ -1,6 +1,7 @@
 import { Link, Navigate, Outlet, useLocation } from 'react-router-dom'
+import type { ReactNode } from 'react'
 import { useAuth } from './auth-context'
-export function RequireAuth() {
+export function RequireAuth({ children }: { children?: ReactNode }) {
   const auth = useAuth()
   const location = useLocation()
   if (auth.loading)
@@ -51,5 +52,5 @@ export function RequireAuth() {
     )
   if (!auth.profile && location.pathname !== '/onboarding')
     return <Navigate to="/onboarding" replace />
-  return <Outlet />
+  return children ?? <Outlet />
 }

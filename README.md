@@ -13,7 +13,7 @@ pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Open the local URL printed by Vite (normally http://localhost:5173). The resource landing page is public; students sign in before loading the catalog. Onboarding, assessment, and recommendations require a signed-in student and a loaded profile. Without public configuration, account controls show setup instructions and cannot submit credentials.
+Open the local URL printed by Vite (normally http://localhost:5173). The public home page introduces SkillBridge's mission, financial literacy topics, and three-step learning journey before offering signup and login. Returning students resume their saved stage. The resource landing page is public; students sign in before loading the catalog. Onboarding, assessment, and recommendations require a signed-in student and a loaded profile. Without public configuration, account controls show setup instructions and cannot submit credentials.
 
 If `.env.local` is not already configured, copy `.env.example` to `.env.local` (do not overwrite an existing local configuration):
 
@@ -117,7 +117,7 @@ there is no cache of a previous assessment's recommendations.
 
 ## Integrated journey and demo
 
-The normal flow is **Login → Onboarding → Knowledge check → Saved results →
+The normal flow is **Welcome → Signup / Login → Onboarding → Knowledge check → Saved results →
 For you → Explore resources**. Returning students resume saved results instead
 of being forced to repeat completed onboarding. Onboarding redirects only after
 a confirmed save; the assessment displays server-confirmed results before
@@ -168,15 +168,15 @@ src/
   vite-env.d.ts           Typed public environment variables
 ```
 
-| Route                 | Preview                                               |
-| --------------------- | ----------------------------------------------------- |
-| `/`                   | Resumes onboarding or saved assessment by preferences |
-| `/login`, `/register` | Email/password login and registration                 |
-| `/onboarding`         | Load, validate, create, and edit learning preferences |
-| `/assessment`         | Secure 10-question quiz and persisted own results     |
-| `/resources`          | Public landing; authenticated resource catalog/search |
-| `/recommendations`    | Top-five explainable ranking using own saved data     |
-| Other paths           | Accessible not-found page with return link            |
+| Route                 | Preview                                                          |
+| --------------------- | ---------------------------------------------------------------- |
+| `/`                   | Public introduction; signed-in students resume their saved stage |
+| `/login`, `/register` | Email/password login and registration                            |
+| `/onboarding`         | Load, validate, create, and edit learning preferences            |
+| `/assessment`         | Secure 10-question quiz and persisted own results                |
+| `/resources`          | Public landing; authenticated resource catalog/search            |
+| `/recommendations`    | Top-five explainable ranking using own saved data                |
+| Other paths           | Accessible not-found page with return link                       |
 
 Navigation exposes all five areas. Anonymous visitors to protected pages are redirected to login and returned to the requested page after authentication. Signed-in students are redirected away from login/registration. The shell preserves active navigation states, a skip link, route focus management, visible keyboard focus, and responsive layouts. The assessment fetches only public question fields from an authenticated Edge Function, sends choices to server-side scoring, and restores the latest saved own result after refresh. Resources support keyword search and combined filters; recommendations use saved preferences and topic scores with explicit explanations. Tests use synthetic fixtures; no real student data or real answer keys are included.
 

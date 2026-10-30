@@ -340,6 +340,14 @@ async function continueToRecommendations() {
 describe('integrated student journey with mocked SDK transport', () => {
   it('connects login, new-profile onboarding, assessment, recommendations, and catalog filtering', async () => {
     visit()
+    await screen.findByRole('heading', {
+      name: 'Money skills for the life ahead.',
+    })
+    expect(screen.queryByLabelText('Email address')).toBeNull()
+    expect(queries).toHaveLength(0)
+    fireEvent.click(
+      screen.getByRole('link', { name: 'Already have an account? Log in' }),
+    )
     await login()
     const interest = await screen.findByRole('checkbox', { name: /Saving/ })
     fireEvent.click(interest)

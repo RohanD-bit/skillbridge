@@ -4,6 +4,7 @@ import { Icon } from './Icon'
 import type { IconName } from './Icon'
 import { AccountControls } from '../auth/AccountControls'
 const navigation: { to: string; label: string; icon: IconName }[] = [
+  { to: '/', label: 'Home', icon: 'bridge' },
   { to: '/onboarding', label: 'Your starting point', icon: 'compass' },
   { to: '/assessment', label: 'Knowledge check', icon: 'book' },
   { to: '/recommendations', label: 'For you', icon: 'spark' },
